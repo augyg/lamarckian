@@ -57,6 +57,7 @@ library
                     , parsec
                     , scrappy-core
                     , snap
+                    , snap-core
                     , bytestring
                     , template-haskell
                     , cryptonite
