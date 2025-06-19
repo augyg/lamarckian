@@ -1,9 +1,6 @@
 module Lamarckian.Compiler where
 
 import Common.Route
---import Landing.Router
-import Landing.Static as Landing
-
 import Language.Haskell.TH
 import Obelisk.Route
 import qualified Control.Exception as CE
@@ -13,18 +10,34 @@ import qualified Data.ByteString as BS
 import System.Directory
 import System.FilePath
 
+-- TODO: currently this gives all power to staticRouter to set the head
+-- it would be nice to abstract an interface like this
+
+-- runStaticSite :: StaticSite t route -> R route -> Q Exp
+
+-- data StaticSite t route = StaticSite
+--   { staticDir :: FilePath
+--   , frontendHead :: R route -> StaticWidget' t ()
+--   , frontendBody :: R route -> StaticWidget' t ()
+---  maybe more:
+--   , snapOptions :: OptionsSnap 
+--   }
+
+
+
 type StaticPackagePath = FilePath 
 tryWritePageGetPath
   :: StaticPackagePath
   -> R LandingRoute
   -> (R LandingRoute -> Q BS.ByteString)
+  -> (FilePath -> Q Exp)
   -> Q Exp
-tryWritePageGetPath staticPackagePath route f = do
+tryWritePageGetPath staticPackagePath route f getFromFile = do
   body <- putDocType route f -- route 
   let filepath = staticRouteToRelativeFilePath (route) 
   let (dir, _) = splitFileName filepath 
   tryWritePage staticPackagePath filepath dir body
-  Landing.staticFilePath $ "html" </> filepath
+  getFromFile $ "html" </> filepath
 
 -- | We should almost have a wrapper that tries to write a page with any number of steps
 tryWritePage :: StaticPackagePath -> FilePath -> String -> BS.ByteString -> Q ()
@@ -51,3 +64,6 @@ putDocType
 putDocType route router = do
   html <- router route
   pure $ "<!DOCTYPE html>" <> html
+
+-- getPageCompiled :: (FilePath -> Q FilePath) -> R LandingRoute -> Q Exp
+-- getPageCompiled getFile route = tryWritePageGetPath ("staticSite" </> "src" </> "html") route staticRouter getFile
