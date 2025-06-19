@@ -25,16 +25,46 @@ import System.FilePath
 
 
 
+data StaticSite r = StaticSite
+  { _staticSite_baseFilePath
+    :: FilePath
+  -- TODO: split up head and body... OF THE DOM I MEAN!!
+  , _staticSite_router
+    :: R r -> Q BS.ByteString
+  , _staticSite_getFromFile
+    :: FilePath -> Q Exp
+  , _staticSite_routeEncoder
+    :: R r -> T.Text
+  }
+
+compileStaticSite :: StaticSite r -> (R r -> Q Exp)
+compileStaticSite cfg =
+  compileStaticSite'
+     (_staticSite_baseFilePath cfg)
+     (_staticSite_router cfg)
+     (_staticSite_getFromFile cfg)
+     (_staticSite_routeEncoder cfg)
+
+compileStaticSite'
+  :: StaticPackagePath
+  -> (R r -> Q BS.ByteString)
+  -> (FilePath -> Q Exp)
+  -> (R r -> T.Text)
+  -> R r
+  -> Q Exp
+compileStaticSite' = tryWritePageGetPath
+
 type StaticPackagePath = FilePath 
 tryWritePageGetPath
   :: StaticPackagePath
-  -> R LandingRoute
-  -> (R LandingRoute -> Q BS.ByteString)
+  -> (R r -> Q BS.ByteString)
   -> (FilePath -> Q Exp)
+  -> (R r -> T.Text)
+  -> R r
   -> Q Exp
-tryWritePageGetPath staticPackagePath route f getFromFile = do
+tryWritePageGetPath staticPackagePath f getFromFile routeToPath route = do
   body <- putDocType route f -- route 
-  let filepath = staticRouteToRelativeFilePath (route) 
+  let filepath = staticRouteToRelativeFilePath (route) routeToPath
   let (dir, _) = splitFileName filepath 
   tryWritePage staticPackagePath filepath dir body
   getFromFile $ "html" </> filepath
@@ -52,14 +82,29 @@ tryWritePage staticPackagePath filepath dir body = do
        (\(_ :: IOException) -> pure $ const False False)
   pure () 
 
-staticRouteToRelativeFilePath :: R LandingRoute -> FilePath
-staticRouteToRelativeFilePath landingRoute = 
-  drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder $ Landing :/ landingRoute) <> ".html"
+-- staticRouteToRelativeFilePath :: R LandingRoute -> FilePath
+-- staticRouteToRelativeFilePath landingRoute = 
+--   drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder $ Landing :/ landingRoute) <> ".html"
+
+staticRouteToRelativeFilePath :: R r -> (R r -> T.Text) -> FilePath
+staticRouteToRelativeFilePath landingRoute toPath = 
+  --drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder landingRoute) <> ".html"
+  drop 1 $ (T.unpack $ toPath landingRoute) <> ".html"
+  
+myStaticFP :: R LandingRoute -> FilePath
+myStaticFP r =
+  staticRouteToRelativeFilePath
+    ( (\x -> Landing :/ x)  r )
+    (renderBackendRoute checkedFullRouteEncoder) 
+  
+  
+  --drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder $ Landing :/ landingRoute) <> ".html"
+
 
 -- Helper func since we need the source to be ByteString
 putDocType
-  :: R LandingRoute
-  -> (R LandingRoute -> Q BS.ByteString)
+  :: R r
+  -> (R r -> Q BS.ByteString)
   -> Q BS.ByteString
 putDocType route router = do
   html <- router route

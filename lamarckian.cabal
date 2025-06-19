@@ -55,8 +55,9 @@ library
                     , containers
                     , transformers
                     , parsec
+                    , scrappy-core
+                    , snap
                     , bytestring
-                    , snap-core
                     , template-haskell
                     , cryptonite
     hs-source-dirs:   src
