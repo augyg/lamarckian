@@ -54,6 +54,7 @@ library
                     , text
                     , containers
                     , transformers
+                    , parsec
                     , bytestring
                     , snap-core
                     , template-haskell
