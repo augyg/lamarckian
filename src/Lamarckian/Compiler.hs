@@ -1,6 +1,5 @@
 module Lamarckian.Compiler where
 
-import Common.Route
 import Language.Haskell.TH
 import Obelisk.Route
 import qualified Control.Exception as CE
