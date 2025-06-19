@@ -10,7 +10,7 @@ import qualified Data.ByteString.Lazy as LBS
 
 
 
-serveCompressed :: MonadSnap m => FilePath -> EnvT m T.Text
+serveCompressed :: MonadSnap m => FilePath -> m T.Text
 serveCompressed fp = do
   withCompression $ do
     writeLBS =<< liftIO (LBS.readFile fp)

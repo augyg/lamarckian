@@ -29,7 +29,7 @@ import qualified Data.ByteString.Lazy as LBS
 
 -- | TODO: given that we are using Template Haskell here, there is really nothing stopping us from
 -- | automatically uploading to github, which could be used for netlify or similar IO effects 
-serveStaticSite :: MonadSnap m => R LandingRoute -> EnvT m () 
+serveStaticSite :: MonadSnap m => R LandingRoute -> m () 
 serveStaticSite = \case  
   LandingBase :/ _ -> do
     serveCompressedWithReport $(getPageCompiled (LandingBase :/ mempty))
@@ -61,16 +61,17 @@ serveStaticSite = \case
     Chapter9 :/ () -> serveCompressedWithReport $(getPageCompiled (Blog :/ Chapter9 :/ ()))
 
 
-serveCompressed :: MonadSnap m => FilePath -> EnvT m T.Text
+serveCompressed :: MonadSnap m => FilePath -> m T.Text
 serveCompressed fp = do
   withCompression $ do
     writeLBS =<< liftIO (LBS.readFile fp)
   let pageName = dropExtension . takeFileName $ fp
   pure $ T.pack pageName 
 
-serveCompressedWithReport :: MonadSnap m => FilePath -> EnvT m ()
+serveCompressedWithReport :: MonadSnap m => FilePath -> m ()
 serveCompressedWithReport fp = do
   pageName <- serveCompressed fp
+  let getAccountIdFromCookies = Left ""
   eithAcctId <- getAccountIdFromCookies
   case matchLesson pageName of
     Nothing -> reportLog False $ LandingPageRequested pageName
