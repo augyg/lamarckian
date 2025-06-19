@@ -90,11 +90,11 @@ staticRouteToRelativeFilePath landingRoute toPath =
   --drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder landingRoute) <> ".html"
   drop 1 $ (T.unpack $ toPath landingRoute) <> ".html"
   
-myStaticFP :: R LandingRoute -> FilePath
-myStaticFP r =
-  staticRouteToRelativeFilePath
-    ( (\x -> Landing :/ x)  r )
-    (renderBackendRoute checkedFullRouteEncoder) 
+-- myStaticFP :: R LandingRoute -> FilePath
+-- myStaticFP r =
+--   staticRouteToRelativeFilePath
+--     ( (\x -> Landing :/ x)  r )
+--     (renderBackendRoute checkedFullRouteEncoder) 
   
   
   --drop 1 $ (T.unpack $ renderBackendRoute checkedFullRouteEncoder $ Landing :/ landingRoute) <> ".html"
