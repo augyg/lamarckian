@@ -20,6 +20,7 @@ import qualified Data.ByteString as BS
 
 -- instance RenderDOM (_ MyRoute) => RenderDOM (StaticWidget (MyRoute :> MySubRoute) t a) where ...
 
+-- Helper func since we need the source to be ByteString
 
 
 unTemplateHTMLString :: Map.Map String HtmlString -> String -> String
