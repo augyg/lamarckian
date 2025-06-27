@@ -1,6 +1,5 @@
 module Lamarckian.Compiler where
 
-import Data.FileEmbed
 
 import Lamarckian.Types
 import Lamarckian.Render
