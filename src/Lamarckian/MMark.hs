@@ -21,8 +21,11 @@ import Text.MMark.Extension.GhcSyntaxHighlighter
 import Text.MMark.Extension.LinkTarget
 import Text.MMark.Extension.Skylighting
 import qualified Text.Megaparsec as MP
+
+import Control.Monad.IO.Class
 import Data.Text as T
 import Data.Text.Lazy as LT
+--import qualified Data.Text.IO as T
 
 extensions :: [MMark.Extension]
 extensions =
@@ -31,12 +34,45 @@ extensions =
   , skylighting
   ]
 
+-- | TODO: can we use istrExp here too? or even scrappy-template might do the job?
+immarkFile :: FilePath -> Q Exp
+immarkFile fp = do
+  _contents <- runIO $ readFile fp
+--   _ <- error $ show $ Prelude.length _contents
+  case MMark.parse fp $ T.pack _contents of
+    Left (e) -> error $ MP.errorBundlePretty e
+    Right bundle ->
+
+      let
+        _x = LT.toStrict . renderText $ MMark.render $ useExtensions extensions bundle
+      in
+        -- error $ show $ bundle
+        ---error $ T.unpack  x
+        [| x |]
+
+
+
+readIMMarkFile :: FilePath -> IO (Either String T.Text)
+readIMMarkFile fp = do
+  _contents <- liftIO $ readFile fp
+--   _ <- error $ show $ Prelude.length _contents
+  case MMark.parse fp $ T.pack _contents of
+    Left (e) -> pure . Left $ MP.errorBundlePretty e
+    Right bundle -> pure . Right $ LT.toStrict . renderText $ MMark.render $ useExtensions extensions bundle
+
+      -- let
+      --   _x = LT.toStrict . renderText $ MMark.render $ useExtensions extensions bundle
+      -- in
+      --   -- error $ show $ bundle
+      --   ---error $ T.unpack  x
+      --   [| x |]
+
 
 immark :: QuasiQuoter
 immark = QuasiQuoter
   { quoteExp  = \md -> do
       [|
-        case MMark.parse "markdown file" $ T.pack $(rstrExp md) of
+        case MMark.parse "<no name>" $ T.pack $(rstrExp md) of
           Left (e) -> error $ MP.errorBundlePretty e
           Right bundle -> LT.toStrict . renderText $ MMark.render $ useExtensions extensions bundle
        |]
