@@ -2,12 +2,57 @@ module Lamarckian.JS where
 
 import Lamarckian.Render
 import Lamarckian.Types
-import Text.IStr
 import Reflex.Dom.Core
 import Control.Monad
 import Control.Monad.IO.Class
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+
+
+import Text.IStr
+import Data.Some (Some(..))
+
+-- A simple indexed GADT
+data Value' a where
+  VInt    :: Int    -> Value' Int
+  VBool   :: Bool   -> Value' Bool
+  VString :: String -> Value' String
+
+deriving instance Show (Value' a)
+
+-- Wrap examples into Some
+store :: [Some Value']
+store =
+  [ Some (VInt 1)
+  , Some (VBool False)
+  , Some (VString "hi")
+  ]
+
+-- Apply one "step" to each case and return a *String* as result
+step :: Some Value' -> String
+step (Some v) = case v of
+  VInt n    -> "incremented: " ++ show (n + 1)
+  VBool b   -> "negated: " ++ show (not b)
+  VString s -> "shouted: " ++ map toUpper s
+  where
+    toUpper c
+      | 'a' <= c && c <= 'z' = toEnum (fromEnum c - 32)
+      | otherwise            = c
+
+-- main :: IO ()
+-- main = mapM_ (putStrLn . step) store
+
+newtype Script = Script String deriving (Semigroup, Monoid)
+
+
+
+data JSObject = JSObject String
+-- | Collect a JS reference and do something with it
+-- | Enforces referential transparency is the purpose
+data SyntaxJS a where
+  With :: SyntaxJS (JSObject, (JSObject -> a))
+  -- WithAPI :: ?
+
 
 newtype JSFunc = JSFunc String deriving Show 
 

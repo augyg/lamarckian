@@ -66,6 +66,7 @@ library
                     , scrappy-core
                     , snap
                     , snap-core
+                    , some
                     , bytestring
                     , template-haskell
                     , cryptonite
