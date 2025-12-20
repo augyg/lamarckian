@@ -36,12 +36,8 @@ library
     exposed-modules:
       --Example
       Lamarckian.Compiler
-      Lamarckian.JS
-      Lamarckian.Render
-      Lamarckian.Template
       Lamarckian.MMark
       Lamarckian.Snap
-      Lamarckian.Types
 
     -- other-modules:
     -- other-extensions:
@@ -56,6 +52,7 @@ library
                     , text
                     , containers
                     , transformers
+                    , lamarckian-core
                     , megaparsec
                     , mmark
                     , mmark-ext

@@ -17,24 +17,6 @@ import qualified Data.ByteString as BS
 import System.Directory
 import System.FilePath
 
-type URL = T.Text
-type CompiledFilePath = Q Exp
-
-data StaticSite r = StaticSite
-  { _staticSite_baseWritableFolder :: FilePath
-  -- ^ the prefix not included in staticFilePath's argument
-  , _staticSite_staticFilePath  :: FilePath -> CompiledFilePath
-  -- ^ Your obelisk generated staticFilePath function
-  , _staticSite_routeEncoder :: R r -> URL
-  -- ^ In the simplest of cases, this is just simply rendering the route
-  -- ie. (<rendered-route>|"root" if nothing).html
-  , _staticSite_subFolder :: Maybe FilePath
-  -- ^ Allows for configuring cases like
-  -- baseWritableFolder/<subFolder>/filepathFromRoute
-  , _staticSite_localHint :: IO Bool
-  -- ^ Flag for whether or not to get file directly from
-  -- where it was written, which only works if local.
-  }
 
 compileStaticSite :: StaticSite r -> (R r -> StaticWidget' r t () -> Q Exp)
 compileStaticSite cfg =
@@ -127,11 +109,6 @@ tryWritePageGetPath localHint baseWritableFolder staticFilePath m_subFolder rout
     FailedWriteFile -> do
       staticFilePath filepath
 
-data Promised = NotDone | DoneFailed Reason | DoneSuccess
-type Reason = String
-
-data CouldWrite = CanWriteFile FilePath | FailedWriteFile deriving Show
-
 -- | We should almost have a wrapper that tries to write a page with any number of steps
 tryWritePageIO :: FilePath -> BS.ByteString -> IO CouldWrite
 tryWritePageIO fpPush body = do
@@ -161,8 +138,3 @@ staticRouteToRelativeFilePath :: R r -> (R r -> T.Text) -> FilePath
 staticRouteToRelativeFilePath landingRoute toPath =
   drop 1
   $ (T.unpack $ toPath landingRoute) <> ".html"
-
-createHtmlDoc :: StaticWidget' t r () -> IO BS.ByteString
-createHtmlDoc dom = do
-  html <- runStaticWidget dom
-  pure $ "<!DOCTYPE html>" <> html
