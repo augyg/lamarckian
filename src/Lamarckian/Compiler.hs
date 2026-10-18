@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 module Lamarckian.Compiler where
 
 
@@ -6,7 +7,7 @@ import Lamarckian.Render
 
 -- import Control.Exception
 
-import Language.Haskell.TH
+import "template-haskell" Language.Haskell.TH
 import Obelisk.Route
 import Control.Monad.IO.Class
 import qualified Control.Exception as CE

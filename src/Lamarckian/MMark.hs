@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -12,7 +13,7 @@ import Text.IStr
 import Scrappy.Scrape
 import Scrappy.Elem hiding (tag)
 import Text.Parsec as P
-import Language.Haskell.TH
+import "template-haskell" Language.Haskell.TH
 import Language.Haskell.Meta.Parse
 import Lucid.Base (renderText)
 import Language.Haskell.TH.Quote (QuasiQuoter(..))
